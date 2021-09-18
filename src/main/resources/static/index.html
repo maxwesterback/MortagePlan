@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>You first Spring application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<form action="/add" method="POST">
+    <p>Let's add a prospect.</p>
+
+    <div>
+        <label for="name">Name:</label>
+        <input name="name" type="string" id="name" value="">
+    </div>
+    <div>
+        <label for="totalLoan">Total loan:</label>
+        <input type="number" step="any" min="0" name="totalLoan" id="totalLoan" value="">
+    </div>
+    <div>
+        <label for="interest">Interest:</label>
+        <input type="number" step="any" min="0" name="interest" id="interest" value="">
+    </div>
+    <div>
+        <label for="years">Years to pay off:</label>
+        <input type="number" min="0" name="years" id="years" value="">
+    </div>
+    <div>
+        <button>Add Prospect</button>
+    </div>
+</form>
+
+<form action="/populate" method="GET">
+    <button>Add original prospects</button>
+</form>
+
+
+<form action="/list" method="GET">
+    <button>List prospects</button>
+</form>
+<form action="/calculate" method="GET">
+    <button>Calculate mortage</button>
+</form>
+</body>
+</html>
