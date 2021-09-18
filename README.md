@@ -10,6 +10,9 @@ Clone or download the project to a folder and with Maven and JDK installed navig
 to build and run the project. Open a browser and go to localhost:8080 to see the beautiful web interface with no CSS. Ctrl + C to terminate the program.
 
 Add prospect - obviously adds the prospect/customer to the database if you fill in the required information
+
 Add original prospects - adds the customers/prospects from the txt file to the DB
+
 List prospects - returns a list of all customers/prospects in db
+
 Calculate mortage - returns a string which says how much each prospect/customer needs to pay monthly to pay off their loan in the desired amount of time
