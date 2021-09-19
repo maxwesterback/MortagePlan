@@ -16,3 +16,5 @@ Add original prospects - adds the customers/prospects from the txt file to the D
 List prospects - returns a list of all customers/prospects in db
 
 Calculate mortage - returns a string which says how much each prospect/customer needs to pay monthly to pay off their loan in the desired amount of time
+
+To create a runnable Jar run the command: mvn clean install in the directory and afterwards run: java -jar MortageCalculator.jar or java -jar MortageCalculator, whichever works for you.
