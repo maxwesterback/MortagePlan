@@ -11,11 +11,20 @@ public class Prospect {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-
     private String name;
-    private double TotalLoan;
+    private double totalLoan;
     private double interest;
     private int years;
+    private double monthlyMortage;
+
+    public double getMonthlyMortage() {
+        return monthlyMortage;
+    }
+
+    public void setMonthlyMortage(double monthlyMortage) {
+        this.monthlyMortage = monthlyMortage;
+    }
+
 
     public String getName() {
         return name;
@@ -26,11 +35,11 @@ public class Prospect {
     }
 
     public double getTotalLoan() {
-        return TotalLoan;
+        return totalLoan;
     }
 
     public void setTotalLoan(double totalLoan) {
-        TotalLoan = totalLoan;
+        this.totalLoan = totalLoan;
     }
 
     public double getInterest() {

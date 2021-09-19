@@ -1,10 +1,16 @@
 package com.crosskey.mortagecalculator;
 
-
+import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-
+import org.junit.rules.TemporaryFolder;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.List;
+
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -14,13 +20,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MortageCalculatorApplicationTests{
 
     private static DecimalFormat df = new DecimalFormat("0.00");
+    File file;
+
+
+    @Rule
+    private TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+
+
+
+    @Test// This is an integration test but decided I wanted to test it since I had some issues
+    public void readFileTest() throws IOException {
+        MortageCalculatorController mortagePlan = new MortageCalculatorController();
+        File file = File.createTempFile( "prospectsTemp", ".txt");
+        assertTrue(file.exists());
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        String line1= "readFile skips first line so this needs to be here";
+        String line2 = "Max, 234, 1, 4";
+        String line3= "Tom, 214, 3, 5";
+        writer.write(line1);
+        writer.write("\n" + line2);
+        writer.write("\n" + line3);
+        writer.close();
+        List<String> prospectList = mortagePlan.readFile(file.getAbsolutePath());
+        assertTrue(prospectList.get(0).equals(line2));
+        assertTrue(prospectList.get(1).equals(line3));
+        file.deleteOnExit();
+    }
 
 
     @Test
     public void testCalculatePower() {
         MortageCalculatorController mortagePlan = new MortageCalculatorController();
         assertEquals(1.0, mortagePlan.calculatePower(1,1));
-        assertEquals(1.0, mortagePlan.calculatePower(5,0));
+        assertEquals(1.0, MortageCalculatorController.calculatePower(5,0));
         assertEquals(0.0, mortagePlan.calculatePower(0,1));
         assertEquals(4.0, mortagePlan.calculatePower(2,2));
         assertEquals(1.0, mortagePlan.calculatePower(-1,4));
@@ -53,5 +86,7 @@ class MortageCalculatorApplicationTests{
         assertTrue(isNan);
 
     }
+
+
 
 }

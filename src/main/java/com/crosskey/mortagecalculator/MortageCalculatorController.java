@@ -2,26 +2,29 @@ package com.crosskey.mortagecalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.util.*;
 
 @RestController
 public class MortageCalculatorController {
 
     private static DecimalFormat df = new DecimalFormat("0.00");
+    private Iterable<Prospect> prospects;
 
     @Autowired
     public ProspectRepository prospectRepository;
 
+
     @PostMapping("/add")
-    public String addProspect(@RequestParam String name, @RequestParam double totalLoan ,@RequestParam double interest, @RequestParam int years) {
+    public String addProspect(@RequestParam String name, @RequestParam double totalLoan ,@RequestParam double interest, @RequestParam int years){
         Prospect prospect = new Prospect();
         prospect.setName(name);
         prospect.setInterest(interest);
         prospect.setTotalLoan(totalLoan);
         prospect.setYears(years);
+        calculateMortage(prospect);
         prospectRepository.save(prospect);
         return "New Prospect added to DB!";
     }
@@ -29,33 +32,76 @@ public class MortageCalculatorController {
 
     @GetMapping("/list")
     public Iterable<Prospect> getCustomers() {
-        return prospectRepository.findAll();
+        prospects = prospectRepository.findAll();
+        return prospects;
+    }
+
+
+    //read original prospects to a list
+    public List<String> readFile(String path) {
+        List<String> prospectList = new ArrayList<String>();
+        try {
+            FileReader reader = new FileReader(path);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            //skip first line
+            bufferedReader.readLine();
+            String line ="";
+            while ((line = bufferedReader.readLine()) != null) {
+                // clean up txt file a little
+                if(!line.isBlank() && !line.isEmpty() && !line.equals("") && !line.equals(".")){
+                    prospectList.add(line);
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return prospectList;
     }
 
     //Fill database with prospects from original txt file.
     @GetMapping("/populate")
-    public void populateDB() {
-        addProspect("Juha", 1000,5,2);
-        addProspect("Karvinen", 4356,1.27,6);
-        addProspect("Claes Månsson", 1300.55,8.67,2);
-        addProspect("\"Clarencé,Andersson\"", 2000,6,4);
+    public String startPopulating(){
+        List<String> prospectList = readFile("src/main/resources/prospects.txt");
+        populateDatabase(prospectList);
+        return "Prospects from text file added to database!";
+    }
+
+    public void populateDatabase(List<String> prospectList) {
+        for(String s: prospectList){
+            //regex expression found online for splitting by commas except for commas inside ""
+            String[] tokens = s.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+            String name = tokens[0];
+            double totalLoan = Double.parseDouble(tokens[1]);
+            double interest = Double.parseDouble(tokens[2]);
+            int years = Integer.parseInt(tokens[3]);
+            addProspect(name, totalLoan, interest, years);
+        }
     }
 
 
-    //iterating through database
+    //iterating through database and adding monthly mortage to db
     @GetMapping("/calculate")
-    public String calculate() throws SQLException {
-        Iterable<Prospect> prospects = getCustomers();
-        int prospectNumber = 1;
-        String result = "";
+    public String calculate() {
+        prospects = getCustomers();
         for(Prospect p: prospects){
             double mortage = calculateMortage(p);
-            result+=("Prospect " + prospectNumber + ": " + p.getName() +
-            " wants to borrow " + p.getTotalLoan() + " for a period of " + p.getYears() +
-                    " years and pay " + df.format(mortage) + " euros each month\n");
-            prospectNumber += 1;
         }
-        System.out.println(result);
+        return printMortagePlan();
+    }
+
+
+    public String printMortagePlan(){
+        prospects = getCustomers();
+        String result = "";
+        int prospectNumber = 1;
+        for(Prospect p: prospects){
+            result=result + System.lineSeparator() + "Prospect " + prospectNumber + ": " + p.getName() +
+                    " wants to borrow " + p.getTotalLoan() + " euros for a period of " + p.getYears() +
+                    " years and pay " + df.format(p.getMonthlyMortage()) + " euros each month";
+            prospectNumber ++;
+        }
+        System.out.print(result);
         return result;
     }
 
@@ -70,7 +116,8 @@ public class MortageCalculatorController {
     }
 
     //following the formula provided
-    public Double calculateMortage(Prospect prospect) throws SQLException {
+    // we're actually not doing with the return value but it helps with creating the JUnit tests
+    public Double calculateMortage(Prospect prospect) {
         //E = U[b(1 + b)^p]/[(1 + b)^p - 1]
         // E = fixed monthly payment
         // b = interest monthly
@@ -90,6 +137,7 @@ public class MortageCalculatorController {
         double x = calculatePower((1+b),p);
         double Y = (b*x)/(x-1);
         double E = U * Y;
+        prospect.setMonthlyMortage(E);
         return E;
     }
 
