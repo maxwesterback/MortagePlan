@@ -1,9 +1,10 @@
 package com.crosskey.mortagecalculator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.io.*;
-import java.sql.*;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -16,6 +17,8 @@ public class MortageCalculatorController {
     @Autowired
     public ProspectRepository prospectRepository;
 
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @PostMapping("/add")
     public String addProspect(@RequestParam String name, @RequestParam double totalLoan ,@RequestParam double interest, @RequestParam int years){
@@ -38,15 +41,13 @@ public class MortageCalculatorController {
 
 
     //read original prospects to a list
-    public List<String> readFile(String path) {
+    public List<String> readFile(BufferedReader reader) {
         List<String> prospectList = new ArrayList<String>();
         try {
-            FileReader reader = new FileReader(path);
-            BufferedReader bufferedReader = new BufferedReader(reader);
             //skip first line
-            bufferedReader.readLine();
+            reader.readLine();
             String line ="";
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 // clean up txt file a little
                 if(!line.isBlank() && !line.isEmpty() && !line.equals("") && !line.equals(".")){
                     prospectList.add(line);
@@ -61,8 +62,14 @@ public class MortageCalculatorController {
 
     //Fill database with prospects from original txt file.
     @GetMapping("/populate")
-    public String startPopulating(){
-        List<String> prospectList = readFile("src/main/resources/prospects.txt");
+    public String startPopulating() {
+        //just getting the path or getResource won't work when we create a JAR
+        InputStream inputStream = MortageCalculatorController.class.getResourceAsStream("/prospects.txt");
+        InputStreamReader inputReader = new InputStreamReader(inputStream);
+        BufferedReader reader = new BufferedReader(inputReader);
+        reader.lines();
+        System.out.println(inputReader.toString());
+        List<String> prospectList = readFile(reader);
         populateDatabase(prospectList);
         return "Prospects from text file added to database!";
     }

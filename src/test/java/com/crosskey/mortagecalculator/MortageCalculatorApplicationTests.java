@@ -3,10 +3,8 @@ package com.crosskey.mortagecalculator;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -41,10 +39,13 @@ class MortageCalculatorApplicationTests{
         writer.write(line1);
         writer.write("\n" + line2);
         writer.write("\n" + line3);
+        writer.write(("\nABC"));
         writer.close();
-        List<String> prospectList = mortagePlan.readFile(file.getAbsolutePath());
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        List<String> prospectList = mortagePlan.readFile(reader);
         assertTrue(prospectList.get(0).equals(line2));
         assertTrue(prospectList.get(1).equals(line3));
+        assertTrue(!prospectList.get(2).equals("ABCD"));
         file.deleteOnExit();
     }
 
