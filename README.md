@@ -7,7 +7,7 @@ heavily in the industry.
 
 To use:
 Clone or download the project to a folder and with Maven and JDK installed navigate to the directory and type: mvn spring-boot:run, into a command line of choice
-to build and run the project. Open a browser and go to localhost:8080 to see the beautiful web interface with no CSS. Ctrl + C to terminate the program.
+to build and run the project. To execute JUnit tests run the command: mvn test. Open a browser and go to localhost:8080 to see the beautiful web interface with no CSS. Ctrl + C to terminate the program.
 
 Add prospect - obviously adds the prospect/customer to the database if you fill in the required information
 
